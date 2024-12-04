@@ -1,47 +1,108 @@
-## Running model
+# AI rewritten GENIE README
 
-Follow order of scripts explained in "Applying the model" section. Most of the parameters can be changed in the config files ("config.yaml", "train_config.yaml", and "process_config.yaml"). Additional details for some of those scripts are given here. After training, to run an individual day of data, run process_continuous_days.py; the input format for the data is given below.
+## Table of Contents
+1. [Model Overview](#model-overview)
+2. [Training the Model](#training-the-model)
+3. [Processing Continuous Data](#processing-continuous-data)
+4. [Input Data Format](#input-data-format)
+5. [Output Format](#output-format)
 
-## Using train_GENIE_model.py
+## Model Overview
 
-To train the model, the training parameters in "train_config.yaml" should be adapted somewhat for different settings. Several parameters that become the inputs to the "generate_synthetic_data" function (defined in lists "training_params", "training_params_2", and "training_params_3") should be edited based on the source domain scale and station distribution. These control things like the average background rate of sources, missed and false pick rates, travel time uncertainity levels, source and spatial label kernel widths, max moveout distances of sources, etc. 
+The GENIE model processes seismic data through a series of scripts defined in the "Applying the model" section. Configuration is primarily managed through three YAML files:
+- `config.yaml`
+- `train_config.yaml`
+- `process_config.yaml`
 
-The training speed can be improved by first building the training data and saving it to distinct files (using build_training_data = True), and loading during training (the memory cost of the files can be ~Tb in size). By default it builds a new batch of training data between each update step.
+## Training the Model
 
-Use the parameter "fixed_subnetworks" in train_config.yaml to train the GNN on specific instances of subnetworks available per day, as recorded in the pick data (else, only random subsets of stations are chosen).
+### Using train_GENIE_model.py
 
-Note: there are a few fixed scale-dependent parameters in module.py, such as "scale_rel", "scale_t" and "eps"; these are used to normalize typical offset distances between nodes, and arival time uncertainities. For small applications (e.g., < 50 km or so), these parameters should typically be decreased from their default values. In the future, these variables will be set in one of the config files.
+#### Configuration Parameters
+The training parameters in `train_config.yaml` should be adjusted based on your specific use case. Key parameters are grouped into three lists:
+- `training_params`
+- `training_params_2`
+- `training_params_3`
 
-## Running process_continuous_days.py
+These parameters control:
+- Average background rate of sources
+- Missed and false pick rates
+- Travel time uncertainty levels
+- Source and spatial label kernel widths
+- Maximum moveout distances of sources
 
-Specify which days of picks you want to run by creating the "Project name"_process_days_list_ver_1.txt file in the main directory.    
+#### Performance Optimization
+- **Training Data Management**:
+  - Set `build_training_data = True` to pre-build and save training data
+  - Warning: Saved files can reach ~TB in size
+  - Default behavior builds new batches between update steps
 
-Each row is a date specified by, e.g., (2000/1/1) for year, month, day. When calling process_continuous_days.py, the first system argument specifies which day, in the "Project name"_process_days_list_ver_1.txt is run. E.g., "python process_continuous_days.py 0" runs the first day in "Project name"_process_days_list_ver_1.txt", and "python process_continuous_days.py 1" runs the second day in "Project name"_process_days_list_ver_1.txt, etc.
+#### Special Considerations
+- Use `fixed_subnetworks` parameter to train GNN on specific subnetwork instances
+- Scale-dependent parameters in `module.py`:
+  - `scale_rel`
+  - `scale_t`
+  - `eps`
+  - These normalize node offset distances and arrival time uncertainties
+  - Should be decreased for small applications (< 50 km)
+  - Future versions will move these to config files
 
-The output of the processing script is saved in the "Catalog" folder and as one of the saved fields includes the associated picks in the "Picks" output (e.g., z = h5py.File('Catalog/2018/Project_results_continuous_days_2018_5_1_ver_1.hdf5', 'r'); z['Picks/%d_Picks_P'%0][:] are the associated P picks for the first event, z['Picks/%d_Picks_P'%1][:] for the second, and z['Picks/%d_Picks_S'%i][:] accesses the associated S waves for all i'th events, etc). The file also saves two versions of the source locations: "srcs" and "srcs_trv". The first is the direct prediction of location from the model, and the second is the same events located using the associated picks and standard travel-time based location optimization. Usually, "srcs_trv" is slightly more accurate, but if a few mis-associations occur, then these locations are also usually more pertubed than "srcs". In constrast, "srcs" will have less highly mislocated events, but retains some bias (and fake clustering) due to the source graph node positions. Using an additional re-location technique such as NonLinLoc or HypoDD on the output of this model can lead to more refined locations.
+## Processing Continuous Data
 
-To load picks, put the pick file in the directory:
+### Setup and Execution
+1. Create a process days list file: `{Project_name}_process_days_list_ver_1.txt`
+2. Format: One date per line (YYYY/MM/DD)
+3. Run command: `python process_continuous_days.py {index}`
+   - `index` refers to the line number in the days list (0-based)
 
-path_file + Picks/%d_%d_%d_ver_%d.npz'%(date[0], date[1], date[2], n_ver))   
-date = [year, month, day] as integers
+### Output Structure
+- Location: `Catalog` folder
+- File format: HDF5
+- Naming: `Project_results_continuous_days_YYYY_M_D_ver_1.hdf5`
 
-The pick files must have the three fields: P, sta_names_use, sta_ind_use   
+#### Source Locations
+Two versions are saved:
+1. `srcs`: Direct model predictions
+   - More consistent
+   - May retain some bias
+   - Shows clustering due to source graph node positions
 
-P: picks from PhaseNet, given to GENIE as input.    
-first column is time since start of day (or can be in terms of a sampling rate, e.g., 100 Hz sampling, specified by the spr_picks parameter in process_config.yaml). Previous default behavior assumed 100 Hz sampling.    
-second column is station index (corresponding to indices of stations in the NC_EHZ_network.npz file).   
-third column is maximum peak ground velocity from 1 s before to 2.5 s after each pick time.   
-fourth column is probability of PhaseNet pick.   
-fifth column is phase type (P waves, 0; S waves, 1), labeled by PhaseNet    
+2. `srcs_trv`: Travel-time based optimized locations
+   - Generally more accurate
+   - More susceptible to misassociation errors
 
-sta_names_use: used stations on this day (referenced to the absolute network file).   
+*Note: Additional refinement possible using NonLinLoc or HypoDD*
 
-sta_ind_use: indices of stations used, corresponding to sta_names_use (referenced to the absolute network file).   
+## Input Data Format
 
-Examples pick files in this format are given in: https://github.com/imcbrearty/GENIE/tree/main/BSSA/Datasets/500%20random%20day%20test. Note that, in these example picks, the pick times were specified in 100 Hz sampling, however the default behavior is now for picks to be specified in absolute time (the parameter spr_picks in process_config.yaml specifies whether absolute time or a given sampling rate is used).
+### Pick File Requirements
+- Location: `{path_file}/Picks/{YYYY}_{MM}_{DD}_ver_{n_ver}.npz`
+- Required Fields:
+  1. `P` (Pick data matrix)
+  2. `sta_names_use`
+  3. `sta_ind_use`
 
-Note that by default, maximum peak ground velocity and probability of PhaseNet pick are not currently used by the model.
+#### Pick Data Matrix Columns
+1. Time since start of day
+   - Can be absolute time or sampling rate-based
+   - Configure via `spr_picks` in `process_config.yaml`
+2. Station index
+3. Maximum peak ground velocity (±1s to +2.5s window)
+4. PhaseNet pick probability
+5. Phase type (0 = P waves, 1 = S waves)
 
-Each of the scripts (i - vi). should run with minimal changes, though some hyperparemeters can be changed, and a few features are hard-coded. Increased documentation will be added.
+#### Station Information
+- `sta_names_use`: Active stations for the day
+- `sta_ind_use`: Station indices corresponding to names
 
-The "process_continuous_days.py" script has some room for improvement, such as increasing the speed at which the input features are created, and simplifying the post-processing steps of obtaining discrete associations and numbers of sources.
+### Example Data
+Sample pick files available at:
+`https://github.com/imcbrearty/GENIE/tree/main/BSSA/Datasets/500%20random%20day%20test`
+
+## Future Improvements
+1. Speed optimization for input feature creation
+2. Streamlined post-processing for:
+   - Discrete associations
+   - Source number determination
+3. Enhanced documentation
+4. Configuration file integration for hard-coded features

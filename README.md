@@ -1,6 +1,16 @@
-# GENIE : Graph Earthquake Neural Interpretation Engine
+# PLAN Project README
 
-A Graph Neural Network (GNN) based earthquake phase associator and spatio-temporal source localization model. 
+This is the GENIE repo for the PLAN project for the study of the aftershocks of the Kahramanmaraş earthquake.
+
+We're using the old GENIE codebase, but with some modifications to the config file and data input to suit our needs.
+
+In particular, we're using a different velocity model, which we take from [this paper's](https://www.researchgate.net/publication/358489567_Active_Seismotectonics_of_the_East_Anatolian_Fault) supplement
+
+In addition, the station location ranges have been calculated using the stations that we have in our dataset.
+
+# GENIE : Graph Earthquake Neural Interpretation Engine README
+
+A Graph Neural Network (GNN) based earthquake phase associator and spatio-temporal source localization model.
 
 The paper associated with this work is given at https://pubs.geoscienceworld.org/ssa/bssa/article/doi/10.1785/0120220182/619845/Earthquake-Phase-Association-with-Graph-Neural.
 
