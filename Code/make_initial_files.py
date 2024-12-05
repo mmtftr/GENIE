@@ -5,10 +5,11 @@ from obspy.core import UTCDateTime
 import pathlib
 from utils import load_config
 
+all_stas = ["ADVT","AFSR","AGRB","AKDM","ANTB","APMY","ARMT","AYDB","BAYT","BCA","BCK","BGKT","BLCB","BLVD","BNGB","BNN","BODT","BZK","CANT","CAVI","CEYT","CHBY","CHOM","CLDR","CORM","CRLT","CTKS","CTYL","DALY","DARE","DAT","DIKM","DKL","DYBB","EDC","EDRB","ELL","ENEZ","ERIK","ERZN","EZN","FETY","GADA","GAZ","GAZK","GEDZ","GELI","GEML","GULA","GULT","GURO","HDMB","IKL","ISK","KAMT","KARO","KARS","KAVV","KCTX","KDZE","KIZT","KLYT","KMRS","KONT","KOZT","KRBG","KTUT","KULA","KULU","KURC","KVT","LADK","LAP","LFK","LMOS","LOD","MAZI","MDNY","MDUB","MERS","MLAZ","MLSB","MRMT","PHSR","POLA","RSDY","RUZG","SARI","SAUV","SDAG","SENK","SHUT","SILT","SIMA","SLVT","SNOP","SULT","SVAN","SVRH","SVSK","TAHT","TASB","TOKT","TVSB","URFA","UVEZ","VRTB","YAYO","YAYX","YER","YESY","YLV","YOZ"]
 
 def setup_region(client: Client, config: dict, t0: UTCDateTime, tf: UTCDateTime):
     """Set up region based on configuration."""
-    return client.get_stations(
+    stations = client.get_stations(
         starttime=t0,
         endtime=tf,
         network=config['network'],
@@ -18,6 +19,8 @@ def setup_region(client: Client, config: dict, t0: UTCDateTime, tf: UTCDateTime)
         minlongitude=config['longitude_range'][0],
         maxlongitude=config['longitude_range'][1]
     )[0]
+
+    return [station for station in stations if station.code in all_stas]
 
 def extract_station_data(stations):
     """Extract station code, location and elevation from the stations list."""
@@ -69,7 +72,7 @@ if __name__ == '__main__':
 
     print("Determining base path for saving files...")
     base_path = str(pathlib.Path().absolute()) + ('\\' if '\\' in str(pathlib.Path().absolute()) else '/')
-    
+
     print(f"Connecting to {config['client']} client...")
     client = Client(config['client'])
 
@@ -85,7 +88,7 @@ if __name__ == '__main__':
         z = np.load(base_path + 'stations.npz', allow_pickle = True)
         locs, stas = z['locs'], z['stas'].astype('U5')
         z.close()
-    
+
     print("Saving files...")
     save_files(base_path, locs, stas, config, years)
 
