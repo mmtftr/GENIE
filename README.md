@@ -4,9 +4,34 @@ This is the GENIE repo for the PLAN project for the study of the aftershocks of 
 
 We're using the old GENIE codebase, but with some modifications to the config file and data input to suit our needs.
 
-In particular, we're using a different velocity model, which we take from [this paper's](https://www.researchgate.net/publication/358489567_Active_Seismotectonics_of_the_East_Anatolian_Fault) supplement
-
 In addition, the station location ranges have been calculated using the stations that we have in our dataset.
+
+# Setup Parameters
+
+To setup the model, we've adjusted the config.yaml to use the "KOERI" client with the "KO" network, adjusted latitude/longitude filters and the time range for our purposes.
+
+```diff
+diff --git a/Code/config.yaml b/Code/config.yaml
+index eca6639..1383685 100644
+--- a/Code/config.yaml
++++ b/Code/config.yaml
+-latitude_range: [18.8, 20.3] # Latitude range of the region that will be processed
+-longitude_range: [-156.1, -154.7] # Longitude range of the region that will be processed
++latitude_range: [39.0, 41.0] # Latitude range of the region that will be processed (Turkey central region)
++longitude_range: [32.0, 35.0] # Longitude range of the region that will be processed (Turkey central region)
+
+  time_range: # This sets up the Catalog and Pick files to have these years initialized
+   start: '2018-01-01'
+-  end: '2023-01-01'
++  end: '2023-12-01'
+
+-client : 'IRIS'
+-network: 'HV'
++client : 'KOERI'
++network: 'KO'
+```
+
+To ensure accurate velocity modeling, we've used the 1D velocity model of the Turkish Peninsula, which we take from [this paper's](https://www.researchgate.net/publication/358489567_Active_Seismotectonics_of_the_East_Anatolian_Fault) supplement
 
 # GENIE : Graph Earthquake Neural Interpretation Engine README
 

@@ -4,8 +4,8 @@ vel_model_ver: 1 ## Which travel time version to save when running calculate tra
 
 ## Note, when running continuous days processing a number of parameters are also set in process_config
 
-latitude_range: [ 35.2832, 42.0195 ] # Latitude range of the region that will be processed (Turkey central region)
-longitude_range: [ 25.8987, 44.2384 ] # Longitude range of the region that will be processed (Turkey central region)
+latitude_range: [ 34.30, 39.75 ] # Latitude range of the region that will be processed (Turkey central region)
+longitude_range: [ 35.27, 40.74 ] # Longitude range of the region that will be processed (Turkey central region)
 depth_range: [-40000, 3000] # Note: depths are in meters, positive above sea level, negative below sea level, and 'increasing' depth means going from deep to shallow.
 time_range: # This sets up the Catalog and Pick files to have these years initialized
   start: '2018-01-01'
