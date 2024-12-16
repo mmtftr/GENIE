@@ -1,4 +1,4 @@
-name_of_project: 'Mayotte'
+name_of_project: 'Kahramanmaras'
 num_cores: 1 # How many cores would you like to use for travel time calculations? (it will increase memory cost)
 vel_model_ver: 1 ## Which travel time version to save when running calculate travel times
 
@@ -54,7 +54,7 @@ using_3D: False # Not fully implemented yet, must adjust travel time calculation
 using_1D: True
 
 ## Graph params
-k_sta_edges: 8 # or 10 are reasonable choices
+k_sta_edges: 3 # or 10 are reasonable choices
 k_spc_edges: 15
 k_time_edges: 10
 t_win: 10.0 ## This is the time window over which predictions are made. Shouldn't be changed for now.
